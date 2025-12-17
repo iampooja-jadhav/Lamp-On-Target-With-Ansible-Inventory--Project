@@ -1,0 +1,121 @@
+# install lamp on target server in optimize format
+---
+- name: install lamp on target server 
+  hosts: targetserver
+  become: yes
+  tasks:
+  - name: install httpd, mariadb, php
+    ansible.builtin.dnf:
+      name:
+       - httpd
+       - mariadb105-server
+       - php
+       - php-fpm
+      state: present
+  - name: start and enable httpd, mariadb, php
+    ansible.builtin.systemd_service:
+      name: "{{item}}" 
+      state: started
+      enabled: true
+    loop:
+     - httpd
+     - mariadb
+     - php-fpm
+  - name: deploy php page
+    ansible.builtin.copy:
+      dest: /var/www/html/index.html
+      content: |
+          <!DOCTYPE html>
+          <html lang="en">
+          <head>
+           <meta charset="UTF-8">
+           <title>LAMP on Target Server</title>
+
+           <style>
+           body {
+            margin: 0;
+            height: 100vh;
+            font-family: "Segoe UI", Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, #1c1c1c, #2b2b2b, #3a3a3a);
+            color: #f2f2f2;
+           }
+
+           .card {
+            background: linear-gradient(135deg, #2f2f2f, #444444);
+            padding: 32px 40px;
+            border-radius: 12px;
+            text-align: center;
+            width: 400px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6);
+            border: 1px solid #5a5a5a;
+           }
+
+           .card h1 {
+            margin-bottom: 12px;
+            font-size: 24px;
+            color: #e0e0e0;
+           }
+
+           .card p {
+            margin: 6px 0;
+            font-size: 14px;
+            color: #cfcfcf;
+           }
+
+          .status {
+            margin-top: 12px;
+            font-weight: bold;
+            color: #9cff9c;
+           }
+
+           .info-box {
+            margin-top: 16px;
+            font-size: 13px;
+            background: rgba(0, 0, 0, 0.35);
+            padding: 10px;
+            border-radius: 6px;
+            border: 1px dashed #777;
+           }
+           </style>
+          </head>
+           <body>
+
+            <div class="card">
+            <h1>🚀 LAMP on Target Server</h1>
+
+            <p>Linux + Apache + MariaDB + PHP</p>
+            <p>Deployed using <strong>Ansible</strong></p>
+
+            <p class="status">Server Status : Running ✅</p>
+
+            <div class="info-box" id="hostname"></div>
+            <div class="info-box" id="datetime"></div>
+           </div>
+
+           <script>
+            function updateDateTime() {
+            const now = new Date();
+            document.getElementById("datetime").innerHTML =
+                "📅 Date : " + now.toLocaleDateString() +
+                "<br>⏰ Time : " + now.toLocaleTimeString();
+           }
+
+           function showHostname() {
+            let host = window.location.hostname;
+            if (!host) {
+                host = "localhost";
+            }
+            document.getElementById("hostname").innerHTML =
+                "🖥 Server Hostname : <strong>" + host + "</strong>";
+           }
+
+          showHostname();
+          setInterval(updateDateTime, 1000);
+          updateDateTime();
+          </script>
+
+           </body>
+           </html>
